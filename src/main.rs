@@ -1,29 +1,29 @@
-struct Point
+enum Color
 {
-    x: f64,
-    y: f64
+    Red,
+    Green,
+    Blue,
+    RGB(u8,u8,u8),
+    CMYK{cyan:u8, magenta:u8, yellow:u8, black:u8}
 }
 
-struct Line
+
+fn enums()
 {
-    start: Point,
-    end: Point
-}
+    let c = Color::RGB(0,0,0);
 
-fn structures()
-{
-    let p1 = Point{x: 3.0, y: 4.0};
-    println!("point p is at {}, {}", p1.x, p1.y);
-
-    let p2 = Point{x: 5.0, y:10.0};
-
-    let my_line = Line{start: p1, end: p2};
-
-    println!("{}", my_line.start.x);
-
+    match c
+    {
+        Color::Red => println!("r"),
+        Color::Green => println!("g"),
+        Color::Blue => println!("b"),
+        Color::RGB(0,0,0) => println!("black"),
+        Color::RGB(r,g,b) => println!("rgb({} {} {})", r, g, b),
+        Color::CMYK{cyan:c,magenta:m,yellow:y,black:k} => println!("cmyk({} {} {} {})", c, m, y, k),
+    }
 }
 
 fn main()
 {
-    structures()
+    enums()
 }
