@@ -1,38 +1,28 @@
 
-fn strings()
-{
-    //utf-8 (stack)
-    let s:&'static str = "Hello, There!";
-    //s = "abc";
-    //let h = s[0];
-    for c in s.chars().rev()
-    {
-        println!("{}", c);
-    }
-    if let Some(first_char) = s.chars().nth(0)
-    {
-        println!("First letter is {}", first_char);
-    }
-    //String (heap)
-    let mut letters = String::new();
-    let mut a = 'a' as u8;
-    while a <= ('z' as u8)
-    {
-        letters.push(a as char);
-        letters.push_str(",");
-        a += 1;
-    }
-    println!("{}", letters);
-
-    let u:&str = &letters;
-    // concatenate
-    // String + &str
-
-    let mut abc = String::from("Hello world");
-    let mut xyz = "Hello world".to_string();
-}
-
 fn main()
 {
-    strings();
+    let name = "Jade";
+    let greeting = format!("hi, I'm {} nice to meet you", name);
+    println!("{}", greeting);
+
+    let run = "run";
+    let forrest = "forrest";
+    let rfr = format!("{0}, {1}, {0}", run, forrest);
+
+    println!("{}", rfr);
+
+    let info = format!(
+        "the name's {last}. {first} {last}.",
+        first = "James",
+        last = "Bond"
+    );
+    println!("{}", info);
+
+    let mixed = format!(
+        "{1} {} {0} {} {data}",
+        "alpha",
+        "beta",
+        data = "delta"
+    );
+    println!("{}", mixed);
 }
