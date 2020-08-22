@@ -1,5 +1,6 @@
 mod minesweeper;
 use read_input::prelude::*;
+use pancurses::{initscr, endwin};
 
 
 pub struct CommandLineInterface
@@ -27,11 +28,17 @@ impl CommandLineInterface
     }
     pub fn display(&self)
     {
-        for y in 0..self.game.get_board()[0].len()
+        let board = self.game.get_board();
+        for y in 0..board[0].len()
         {
-            for x in 0..self.game.get_board().len()
+            for x in 0..board.len()
             {
-                match self.game.get_board()[x][y]
+                if (x, y) == self.cursor
+                {
+                    print!("□");
+                    continue;
+                }
+                match board[x][y]
                 {
                     minesweeper::Tile::Clear(minesweeper::State::Hidden) => {
                         print!("~");
