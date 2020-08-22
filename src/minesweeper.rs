@@ -155,7 +155,7 @@ impl Minesweeper
                 {
                     continue;
                 }
-                if self.is_mined((x as isize + dx) as usize, (y as isize + dx) as usize)
+                if self.is_mined((x as isize + dx) as usize, (y as isize + dy) as usize)
                 {
                     mines += 1;
                 }
