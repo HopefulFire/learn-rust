@@ -2,7 +2,7 @@ mod minesweeper;
 use read_input::prelude::*;
 
 
-struct CommandLineInterface
+pub struct CommandLineInterface
 {
     game:minesweeper::Minesweeper,
     cursor:(usize, usize)
@@ -22,6 +22,7 @@ impl CommandLineInterface
             game:minesweeper::Minesweeper::new(xdim, ydim, mines),
             cursor:(0, 0)
         };
+        cli.display();
         cli
     }
     pub fn display(&self)
