@@ -36,6 +36,34 @@ impl Minesweeper
             Tile::Clear(State::Hidden) => {
                 let mines = self.find_mines_around(x, y);
                 self.board[x][y] = Tile::Clear(State::Near(mines));
+                if mines == 0
+                {
+                    for dx in -1..2
+                    {
+                        if x as isize + dx == -1
+                        || x as isize + dx == self.board.len() as isize
+                        {
+                            continue;
+                        }
+                        for dy in -1..2
+                        {
+                            if y as isize + dy == -1
+                            || y as isize + dy == self.board[0].len() as isize
+                            || dx == dy
+                            || dx * -1 == dy
+                            {
+                                continue;
+                            }
+                            match &self.board[(x as isize + dx) as usize][(y as isize + dy) as usize]
+                            {
+                                Tile::Clear(State::Hidden) => {
+                                    self.touch_mine((x as isize + dx) as usize, (y as isize + dy) as usize);
+                                },
+                                _ => {}, // do nothing
+                            }
+                        }
+                    }
+                }
                 false
             },
             Tile::Clear(_) => {false},
@@ -145,13 +173,15 @@ impl Minesweeper
         let mut mines:usize = 0;
         for dx in -1..2
         {
-            if x as isize + dx == -1 || x as isize + dx == self.board.len() as isize
+            if x as isize + dx == -1
+            || x as isize + dx == self.board.len() as isize
             {
                 continue;
             }
             for dy in -1..2
             {
-                if y as isize + dy == -1 || y as isize + dy == self.board[0].len() as isize
+                if y as isize + dy == -1
+                || y as isize + dy == self.board[0].len() as isize
                 {
                     continue;
                 }
