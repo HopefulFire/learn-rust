@@ -1,12 +1,13 @@
 mod minesweeper;
 use read_input::prelude::*;
-use pancurses::{initscr, endwin};
+use pancurses::initscr;
 
 
 pub struct CommandLineInterface
 {
     game:minesweeper::Minesweeper,
-    cursor:(usize, usize)
+    cursor:(usize, usize),
+    window:pancurses::Window,
 }
 
 impl CommandLineInterface
@@ -21,7 +22,8 @@ impl CommandLineInterface
         let mines = input().get();
         let cli = CommandLineInterface{
             game:minesweeper::Minesweeper::new(xdim, ydim, mines),
-            cursor:(0, 0)
+            cursor:(0, 0),
+            window:initscr(),
         };
         cli.display();
         cli
@@ -35,27 +37,28 @@ impl CommandLineInterface
             {
                 if (x, y) == self.cursor
                 {
-                    print!("□");
+                    self.window.printw("□");
                     continue;
                 }
                 match board[x][y]
                 {
                     minesweeper::Tile::Clear(minesweeper::State::Hidden) => {
-                        print!("~");
+                        self.window.printw("~");
                     },
                     minesweeper::Tile::Clear(minesweeper::State::Near(mines)) => {
-                        print!("{}", mines);
+                        self.window.printw(format!("{}", mines));
                     },
                     minesweeper::Tile::Mined => {
-                        print!("~");
+                        self.window.printw("~");
                     },
                     minesweeper::Tile::Flagged(_) => {
-                        print!("F");
+                        self.window.printw("F");
                     },
                 }
             }
-            println!("");
+            self.window.printw("\n");
         }
+     self.window.refresh();
     }
 
 }
