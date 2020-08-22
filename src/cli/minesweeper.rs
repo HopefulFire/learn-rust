@@ -1,14 +1,14 @@
 use rand::prelude::*;
 
 #[derive(Clone)]
-pub enum State
+enum State
 {
     Hidden,
     Near(usize),
 }
 
 #[derive(Clone)]
-pub enum Tile
+enum Tile
 {
     Clear(State),
     Mined,
@@ -24,7 +24,7 @@ impl Minesweeper
 {
     pub fn new(xdim:usize, ydim:usize, mines:usize) -> Minesweeper
     {
-        let mut game = Minesweeper{board:Vec::new()};
+        let mut game = Minesweeper{board: Vec::new()};
         game.generate(xdim, ydim, mines);
         game
     }
@@ -92,9 +92,42 @@ impl Minesweeper
         }
     }
 
-    pub fn get_board(&self) -> Vec<Vec<Tile>>
+    pub fn display(&self)
     {
-        return self.board;
+        for y in 0..self.board[0].len()
+        {
+            for x in 0..self.board.len()
+            {
+                match self.board[x][y]
+                {
+                    Tile::Clear(State::Hidden) => {
+                        print!("~");
+                    },
+                    Tile::Clear(State::Near(mines)) => {
+                        print!("{}", mines);
+                    },
+                    Tile::Mined => {
+                        print!("~");
+                    },
+                    Tile::Flagged(_) => {
+                        print!("F");
+                    },
+                }
+            }
+            println!("");
+        }
+    }
+
+    pub fn display_cleared(&mut self)
+    {
+        for x in 0..self.board.len()
+        {
+            for y in 0..self.board[0].len()
+            {
+                self.touch_mine(x, y);
+            }
+        }
+        self.display();
     }
 
     fn generate(&mut self, xdim:usize, ydim:usize, mut mines:usize)
