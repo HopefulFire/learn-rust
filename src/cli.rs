@@ -1,8 +1,18 @@
 mod minesweeper;
 use read_input::prelude::*;
-use pancurses::initscr;
+use pancurses::{initscr, Input, noecho};
 
-
+enum Choice
+{
+    Up,
+    Down,
+    Left,
+    Right,
+    Escape,
+    Flag,
+    Touch,
+    Invalid,
+}
 pub struct CommandLineInterface
 {
     game:minesweeper::Minesweeper,
@@ -20,16 +30,68 @@ impl CommandLineInterface
         let ydim = input().get();
         println!("Enter number of mines:");
         let mines = input().get();
+        noecho();
         let cli = CommandLineInterface{
             game:minesweeper::Minesweeper::new(xdim, ydim, mines),
             cursor:(0, 0),
             window:initscr(),
         };
-        cli.display();
         cli
     }
-    pub fn display(&self)
+
+    pub fn event_loop(&mut self)
     {
+        let xsize = self.game.get_board().len();
+        let ysize = self.game.get_board().len();
+        loop
+        {
+            self.display();
+            match self.get_input()
+            {
+                Choice::Up => {
+                    match &mut self.cursor
+                    {
+                        (_, ysize) => {},
+                        (x, y) => {
+                            *y += 1;
+                        },
+                    }
+                },
+                Choice::Left => {
+                    match &mut self.cursor
+                    {
+                        (0, _) => {},
+                        (x, y) => {
+                            *x -= 1;
+                        },
+                    }
+                },
+                Choice::Down => {
+                    match &mut self.cursor
+                    {
+                        (_, 0) => {},
+                        (x, y) => {
+                            *y -= 1;
+                        },
+                    }
+                }
+                Choice::Right => {
+                    match &mut self.cursor
+                    {
+                        (xsize, _) => {},
+                        (x, y) => {
+                            *x += 1;
+                        },
+                    }
+                }
+                _ => {},
+            }
+        }
+    }
+
+    fn display(&self)
+    {
+        self.window.refresh();
         let board = self.game.get_board();
         for y in 0..board[0].len()
         {
@@ -61,4 +123,53 @@ impl CommandLineInterface
      self.window.refresh();
     }
 
+    fn get_input(&self) -> Choice
+    {
+        self.window.keypad(true);
+        match self.window.getch()
+        {
+            Some(Input::Character(c)) => {
+                self.window.keypad(false);
+                match c
+                {
+                    'w' => {
+                        Choice::Up
+                    },
+                    'a' => {
+                        Choice::Left
+                    },
+                    's' => {
+                        Choice::Down
+                    },
+                    'd' => {
+                        Choice::Right
+                    },
+                    'f' => {
+                        Choice::Flag
+                    },
+                    '\n' => {
+                        Choice::Touch
+                    },
+                    'e' => {
+                        Choice::Touch
+                    },
+                    'Q' => {
+                        Choice::Escape
+                    },
+                    _ => {
+                        Choice::Invalid
+                    },
+                }
+            },
+            Some(Input::KeyDC) => {
+                Choice::Invalid
+            },
+            Some(_) => {
+                Choice::Invalid
+            },
+            None => {
+                Choice::Invalid
+            }
+        }
+    }
 }

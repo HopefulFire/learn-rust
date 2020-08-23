@@ -1,5 +1,11 @@
 mod cli;
+use pancurses::endwin;
+
 fn main()
 {
-    let run = cli::CommandLineInterface::new();
+    let mut run = cli::CommandLineInterface::new();
+
+    run.event_loop();
+
+    endwin();
 }
