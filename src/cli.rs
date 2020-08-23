@@ -161,10 +161,7 @@ impl CommandLineInterface
                     },
                 }
             },
-            Some(Input::KeyDC) => {
-                Choice::Invalid
-            },
-            Some(_) => {
+                Some(_) => {
                 Choice::Invalid
             },
             None => {
