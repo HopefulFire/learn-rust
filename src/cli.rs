@@ -1,6 +1,6 @@
 mod minesweeper;
 use read_input::prelude::*;
-use pancurses::{initscr, Input, noecho};
+use easycurses::*;
 
 enum Choice
 {
@@ -13,16 +13,17 @@ enum Choice
     Touch,
     Invalid,
 }
+
 pub struct CommandLineInterface
 {
     game:minesweeper::Minesweeper,
     cursor:(usize, usize),
-    window:pancurses::Window,
+    window:easycurses::EasyCurses,
 }
 
 impl CommandLineInterface
 {
-    pub fn new() -> CommandLineInterface
+    pub fn new() -> Option<Self>
     {
         println!("Enter x dimension:");
         let xdim = input().get();
@@ -30,106 +31,114 @@ impl CommandLineInterface
         let ydim = input().get();
         println!("Enter number of mines:");
         let mines = input().get();
-        noecho();
-        let cli = CommandLineInterface{
-            game:minesweeper::Minesweeper::new(xdim, ydim, mines),
-            cursor:(0, 0),
-            window:initscr(),
-        };
-        cli
+        match easycurses::EasyCurses::initialize_system()
+        {
+            Some(ec) => {
+                let cli = CommandLineInterface{
+                    game:minesweeper::Minesweeper::new(xdim, ydim, mines),
+                    cursor:(0, 0),
+                    window:ec,
+                };
+                Some(cli)
+            },
+            None => {
+                None
+            }
+        }
     }
 
     pub fn event_loop(&mut self)
     {
-        let xsize = self.game.get_board().len();
-        let ysize = self.game.get_board().len();
+        let xdim = self.game.get_board().len();
+        let ydim = self.game.get_board().len();
         loop
         {
             self.display();
             match self.get_input()
             {
                 Choice::Up => {
-                    match &mut self.cursor
+                    if self.cursor.1 + 1 != ydim
                     {
-                        (_, ysize) => {},
-                        (x, y) => {
-                            *y += 1;
-                        },
+                        self.cursor.1 += 1;
                     }
                 },
                 Choice::Left => {
-                    match &mut self.cursor
+                    if self.cursor.0 as isize - 1 != -1
                     {
-                        (0, _) => {},
-                        (x, y) => {
-                            *x -= 1;
-                        },
+                        self.cursor.0 -= 1;
                     }
                 },
                 Choice::Down => {
-                    match &mut self.cursor
+                    if self.cursor.1 as isize - 1 != -1
                     {
-                        (_, 0) => {},
-                        (x, y) => {
-                            *y -= 1;
-                        },
+                        self.cursor.1 -= 1;
                     }
-                }
+                },
                 Choice::Right => {
-                    match &mut self.cursor
+                    if self.cursor.0 + 1 != xdim
                     {
-                        (xsize, _) => {},
-                        (x, y) => {
-                            *x += 1;
-                        },
+                        self.cursor.0 += 1;
                     }
-                }
-                _ => {},
+                },
+                Choice::Flag => {
+                    if !self.game.toggle_flag(self.cursor.0, self.cursor.1)
+                    {
+                        println!("Invalid position for flag");
+                    }
+                },
+                Choice::Touch => {
+                    if self.game.touch_mine(self.cursor.0, self.cursor.1)
+                    {
+                        break;
+                    }
+                },
+                Choice::Escape => {
+                    break;
+                },
+                Choice::Invalid => {},
             }
         }
     }
 
-    fn display(&self)
+    fn display(&mut self)
     {
-        self.window.refresh();
+        self.window.clear();
         let board = self.game.get_board();
-        for y in 0..board[0].len()
+        for y in (0..board[0].len()).rev()
         {
             for x in 0..board.len()
             {
                 if (x, y) == self.cursor
                 {
-                    self.window.printw("□");
+                    self.window.print("X");
                     continue;
                 }
                 match board[x][y]
                 {
                     minesweeper::Tile::Clear(minesweeper::State::Hidden) => {
-                        self.window.printw("~");
+                        self.window.print("~");
                     },
                     minesweeper::Tile::Clear(minesweeper::State::Near(mines)) => {
-                        self.window.printw(format!("{}", mines));
+                        self.window.print(format!("{}", mines));
                     },
                     minesweeper::Tile::Mined => {
-                        self.window.printw("~");
+                        self.window.print("~");
                     },
                     minesweeper::Tile::Flagged(_) => {
-                        self.window.printw("F");
+                        self.window.print("F");
                     },
                 }
             }
-            self.window.printw("\n");
+            self.window.print("\n");
         }
      self.window.refresh();
     }
 
-    fn get_input(&self) -> Choice
+    fn get_input(&mut self) -> Choice
     {
-        self.window.keypad(true);
-        match self.window.getch()
+        match self.window.get_input()
         {
             Some(Input::Character(c)) => {
-                self.window.keypad(false);
                 match c
                 {
                     'w' => {
@@ -161,12 +170,12 @@ impl CommandLineInterface
                     },
                 }
             },
-                Some(_) => {
+            Some(_) => {
                 Choice::Invalid
             },
             None => {
                 Choice::Invalid
-            }
+            },
         }
     }
 }

@@ -49,8 +49,6 @@ impl Minesweeper
                         {
                             if y as isize + dy == -1
                             || y as isize + dy == self.board[0].len() as isize
-                            || dx == dy
-                            || dx * -1 == dy
                             {
                                 continue;
                             }

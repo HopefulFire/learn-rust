@@ -1,11 +1,14 @@
 mod cli;
-use pancurses::endwin;
 
 fn main()
 {
-    let mut run = cli::CommandLineInterface::new();
-
-    run.event_loop();
-
-    endwin();
+    match cli::CommandLineInterface::new()
+    {
+        Some(mut run) => {
+            run.event_loop()
+        },
+        None => {
+            println!("Error!");
+        },
+    }
 }
