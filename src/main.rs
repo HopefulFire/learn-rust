@@ -1,4 +1,5 @@
 use rand::prelude::*;
+use regex::Regex;
 use std::collections::HashMap;
 
 fn main()
@@ -39,5 +40,28 @@ fn main()
             }
         }
         println!("{}", most_used);
+    }
+
+    {
+        let vowel = Regex::new(r"[aeiou]").unwrap();
+        let s1 = String::from("Hello my name is Fred");
+        let mut s2 = String::new();
+        let split_s1 = s1.split_whitespace();
+        for word in split_s1
+        {
+            let mut new_word = String::new();
+            let mut suffix = String::from("hay");
+            for (i, c) in word.chars().enumerate()
+            {
+                if i == 0 && !vowel.is_match(&format!("{}", c))
+                {
+                    suffix = format!("{}ay", c);
+                    continue;
+                }
+                new_word.push_str(&format!("{}", c));
+            }
+            s2.push_str(&format!("{}{} ", new_word, suffix));
+        }
+        println!("{}", s2);
     }
 }
